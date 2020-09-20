@@ -206,6 +206,8 @@ class ImageComposition():
         self._validate_and_process_backgrounds()
 
     def _validate_and_process_foregrounds(self):
+        def accept(d: Path):
+            return not d.name.startswith('.')
 
         self.foregrounds_dict = dict()
 
@@ -214,24 +216,20 @@ class ImageComposition():
                 raise Exception(f'file found in foregrounds directory '
                                 f'(expected super-category directories), '
                                 f'ignoring: {super_category_dir}')
-                continue
 
             # This is a super category directory
-            for category_dir in super_category_dir.iterdir():
+            for category_dir in [d for d in super_category_dir.iterdir() if accept(d)]:
                 if not category_dir.is_dir():
                     raise Exception(
                         f'file found in super category directory (expected category directories), ignoring: {category_dir}')
-                    continue
 
                 # This is a category directory
                 for image_file in category_dir.iterdir():
                     if not image_file.is_file():
                         raise Exception(
                             f'a directory was found inside a category directory, ignoring: {str(image_file)}')
-                        continue
                     if image_file.suffix != '.png':
                         raise Exception(f'foreground must be a .png file, skipping: {str(image_file)}')
-                        continue
 
                     # Valid foreground image, add to foregrounds_dict
                     super_category = super_category_dir.name
